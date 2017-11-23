@@ -407,10 +407,7 @@ $nhymxu_at_coupon_pro = new nhymxu_at_coupon_pro();
 
 if( is_admin() ) {
 	require_once __DIR__ . '/admin.php';
-	require_once __DIR__ . '/editor.php';
 	require_once __DIR__ . '/coupons_list.php';
-
-	new nhymxu_at_coupon_editor();
 	new nhymxu_at_coupon_admin();
 }
 
