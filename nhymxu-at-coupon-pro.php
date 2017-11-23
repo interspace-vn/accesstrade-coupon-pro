@@ -24,7 +24,6 @@ class nhymxu_at_coupon_pro {
 	];
 
 	public function __construct() {
-		add_filter( 'http_request_host_is_external', [$this, 'allow_external_update_host'], 10, 3 );
 		add_action( 'nhymxu_at_coupon_sync_merchant_event', [$this,'do_this_daily'] );
 		add_shortcode( 'atcoupon', [$this,'shortcode_callback'] );
 		add_action( 'init', [$this, 'init_updater'] );
@@ -239,12 +238,6 @@ class nhymxu_at_coupon_pro {
 		$this->do_this_daily();
 		echo 'running';
 		wp_die();		
-	}
-
-	public function allow_external_update_host( $allow, $host, $url ) {
-		//if ( $host == 'sv.isvn.space' ) {$allow = true;}
-		$allow = true;
-		return $allow;
 	}
 
 	public function init_updater() {
