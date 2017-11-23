@@ -13,7 +13,7 @@ define('NHYMXU_AT_COUPON_PRO_VER', '0.2.0');
 
 date_default_timezone_set('Asia/Ho_Chi_Minh');
 
-class nhymxu_at_coupon {
+class nhymxu_at_coupon_pro {
 
 	private $ignore_campains = [
 		'lazadacashback',
@@ -403,7 +403,7 @@ class nhymxu_at_coupon {
 	}
 }
 
-$nhymxu_at_coupon = new nhymxu_at_coupon();
+$nhymxu_at_coupon_pro = new nhymxu_at_coupon_pro();
 
 if( is_admin() ) {
 	require_once __DIR__ . '/admin.php';
