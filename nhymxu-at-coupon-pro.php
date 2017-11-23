@@ -54,7 +54,7 @@ class nhymxu_at_coupon_pro {
 			$msg['error_msg'] = $result->get_error_message();
 			$msg['action'] = 'get_merchant';
 
-			$this->insert_log( $msg );
+			$nhymxu_at_coupon->insert_log( $msg );
 		} else {
 			$input = json_decode( $result['body'], true );
 			if( !empty($input) && isset( $input['data'] ) && is_array( $input['data'] ) ) {
@@ -89,20 +89,6 @@ class nhymxu_at_coupon_pro {
 			$license_key = 'AccessTrade';
 			new nhymxu_AT_AutoUpdate( NHYMXU_AT_COUPON_VER, $plugin_remote_path, $plugin_slug, $license_user, $license_key );
 		}
-	}
-
-	private function insert_log( $data ) {
-		global $wpdb;
-
-		$wpdb->insert(
-			$wpdb->prefix . 'coupon_logs',
-			[
-				'created_at'	=> time(),
-				'data'	=> json_encode( $data )
-			],
-			['%d', '%s']
-		);
-		
 	}
 
 	private function insert_coupon( $data ) {
@@ -147,7 +133,7 @@ class nhymxu_at_coupon_pro {
 		$msg['error_msg'] = json_encode( $data );
 		$msg['action'] = 'insert_coupon';
 			
-		$this->insert_log( $msg );		
+		$nhymxu_at_coupon->insert_log( $msg );		
 
 		return 0;
 	}
