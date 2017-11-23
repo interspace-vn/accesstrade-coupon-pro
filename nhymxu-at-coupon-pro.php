@@ -171,11 +171,10 @@ $nhymxu_at_coupon_pro = new nhymxu_at_coupon_pro();
 if( is_admin() ) {
 	require_once __DIR__ . '/coupons_list.php';
 	require_once __DIR__ . '/admin.php';
-	new nhymxu_at_coupon_admin();
+	new nhymxu_at_coupon_pro_admin();
 }
 
 require_once __DIR__ . '/install.php';
-register_activation_hook( __FILE__, ['nhymxu_at_coupon_pro_install', 'plugin_install'] );
 register_activation_hook( __FILE__, ['nhymxu_at_coupon_pro_install', 'plugin_install'] );
 register_deactivation_hook( __FILE__, ['nhymxu_at_coupon_pro_install', 'plugin_deactive'] );
 register_uninstall_hook( __FILE__, ['nhymxu_at_coupon_pro_install', 'plugin_uninstall'] );

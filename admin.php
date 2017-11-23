@@ -1,6 +1,6 @@
 <?php
 
-class nhymxu_at_coupon_admin {
+class nhymxu_at_coupon_pro_admin {
 	public function __construct() {
 		add_action( 'admin_menu', [$this,'admin_page'] );
 		add_action( 'wp_ajax_nhymxu_coupons_ajax_insertupdate', [$this, 'ajax_insert_update'] );
@@ -387,7 +387,8 @@ class nhymxu_at_coupon_admin {
 				return false;
 			}
 
-			var today = new Date();
+			var today_full = new Date();
+			var today = new Date( today_full.getFullYear() + '-' + (today_full.getMonth()+1) + '-' + today_full.getDate() );
 			var expired = new Date( input['exp'] );
 			if( +expired <= +today ) {
 				nhymxu_insert_log('Chọn ngày hết hạn phải từ hôm nay.');
@@ -520,7 +521,7 @@ class nhymxu_at_coupon_admin {
 	public function admin_page_callback_list() {
 		$coupon_list_table = new Nhymxu_AT_Coupon_List();
 		$coupon_list_table->prepare_items();
-	?>
+		?>
 		<style>
 		.wp-list-table .column-id {
 			width: 60px;
