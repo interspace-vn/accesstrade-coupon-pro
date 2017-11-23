@@ -415,7 +415,4 @@ if( is_admin() ) {
 }
 
 require_once __DIR__ . '/install.php';
-
-register_activation_hook( __FILE__, ['nhymxu_at_coupon_install', 'plugin_install'] );
-register_deactivation_hook( __FILE__, ['nhymxu_at_coupon_install', 'plugin_deactive'] );
-register_uninstall_hook( __FILE__, ['nhymxu_at_coupon_install', 'plugin_uninstall'] );
+register_activation_hook( __FILE__, ['nhymxu_at_coupon_pro_install', 'plugin_install'] );
