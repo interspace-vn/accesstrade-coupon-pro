@@ -252,7 +252,7 @@ class nhymxu_at_coupon_pro {
 			if( !class_exists('nhymxu_AT_AutoUpdate') ) {
 				require_once('nhymxu-updater.php');
 			}
-			$plugin_remote_path = 'http://sv.isvn.space/wp-update/plugin-accesstrade-coupon.json';
+			$plugin_remote_path = 'http://sv.isvn.space/wp-update/plugin-accesstrade-coupon-pro.json';
 			$plugin_slug = plugin_basename( __FILE__ );
 			$license_user = 'nhymxu';
 			$license_key = 'AccessTrade';
