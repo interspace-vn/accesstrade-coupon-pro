@@ -25,55 +25,10 @@ class nhymxu_at_coupon_pro {
 
 	public function __construct() {
 		add_filter( 'http_request_host_is_external', [$this, 'allow_external_update_host'], 10, 3 );
-		add_action( 'nhymxu_at_coupon_sync_event', [$this,'do_this_twicedaily'] );
 		add_action( 'nhymxu_at_coupon_sync_merchant_event', [$this,'do_this_daily'] );
 		add_shortcode( 'atcoupon', [$this,'shortcode_callback'] );
 		add_action( 'init', [$this, 'init_updater'] );
-		add_action( 'wp_ajax_nhymxu_coupons_ajax_forceupdate', [$this, 'ajax_force_update'] );
 		add_action( 'wp_ajax_nhymxu_coupons_ajax_forceupdate_merchants', [$this, 'ajax_force_update_merchants'] );
-	}
-	
-	public function do_this_twicedaily() {
-		global $wpdb;
-		$previous_time = get_option('nhymxu_at_coupon_sync_time', 0);
-		$current_time = time();
-		
-		$url = 'http://sv.isvn.space/api/v1/mars/coupon?from='.$previous_time.'&to='.$current_time;
-
-		$result = wp_remote_get( $url, ['timeout'=>'60'] );
-
-		if ( is_wp_error( $result ) ) {
-			$msg = [];
-			$msg['previous_time'] = $previous_time;
-			$msg['current_time'] = $current_time;
-			$msg['error_msg'] = $result->get_error_message();
-			$msg['action'] = 'get_remote_data';
-
-			$this->insert_log( $msg );
-		} else {
-			$input = json_decode( $result['body'], true );
-			if( !empty($input) && isset( $input[0] ) && is_array( $input[0] ) ) {
-				$wpdb->query("START TRANSACTION;");
-				try {
-					foreach( $input as $cp ) {
-						$this->insert_coupon($cp);
-					}
-					update_option('nhymxu_at_coupon_sync_time', $current_time);
-					$wpdb->query("COMMIT;");
-				} catch ( Exception $e ) {
-					$msg = [];
-					$msg['previous_time'] = $previous_time;
-					$msg['current_time'] = $current_time;
-					$msg['error_msg'] = $e->getMessage();
-					$msg['action'] = 'insert_data';
-
-					$this->insert_log( $msg );
-
-					$wpdb->query("ROLLBACK;");
-				}
-			}
-		}
-
 	}
 
 	public function do_this_daily() {
@@ -275,15 +230,6 @@ class nhymxu_at_coupon_pro {
 		}
 	
 		return 'https://pub.accesstrade.vn/deep_link/'. $option['uid'] .'?url=' . rawurlencode( $url ) . $utm_source;
-	}
-
-	/*
-	 * Force update coupon from server
-	 */
-	public function ajax_force_update() {
-		$this->do_this_twicedaily();
-		echo 'running';
-		wp_die();
 	}
 
 	/*
