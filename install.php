@@ -21,5 +21,19 @@ class nhymxu_at_coupon_pro_install {
 
 	static public function plugin_install() {
 		static::active_track();
+
+		if (! wp_next_scheduled ( 'nhymxu_at_coupon_sync_merchant_event' )) {
+			wp_schedule_event( time(), 'daily', 'nhymxu_at_coupon_sync_merchant_event' );
+		}
+	}
+
+	static public function plugin_deactive() {
+		wp_clear_scheduled_hook( 'nhymxu_at_coupon_sync_merchant_event' );
+	}
+
+	static public function plugin_uninstall() {
+		delete_option('nhymxu_at_coupon_merchants');
+		delete_site_option('nhymxu_at_coupon_merchants');
+		wp_clear_scheduled_hook( 'nhymxu_at_coupon_sync_merchant_event' );
 	}
 }
