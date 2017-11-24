@@ -181,7 +181,7 @@ class nhymxu_at_coupon_pro_admin {
 	 * Admin page setting
 	 */
 	public function admin_page_callback_settings() {
-		global $wpdb;
+		global $wpdb, $nhymxu_at_coupon_pro;
 		if( isset( $_POST, $_POST['nhymxu_hidden'] ) && $_POST['nhymxu_hidden'] == 'coupon' ) {
 			$input = [
 				'uid'	=> sanitize_text_field($_REQUEST['nhymxu_at_coupon_uid']),
@@ -190,6 +190,9 @@ class nhymxu_at_coupon_pro_admin {
 			];
 	
 			update_option('nhymxu_at_coupon', $input);
+			update_option( 'nhymxu_at_coupon_merchants', [] );
+			$nhymxu_at_coupon_pro->do_this_daily();
+
 			echo '<h1>Cập nhật thành công</h1><br>';
 		}
 		$option = get_option('nhymxu_at_coupon', ['uid' => '', 'utmsource' => '']);
