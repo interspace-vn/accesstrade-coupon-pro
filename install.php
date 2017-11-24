@@ -20,6 +20,12 @@ class nhymxu_at_coupon_pro_install {
 	}
 
 	static public function plugin_install() {
+		if( !is_plugin_active( 'nhymxu-at-coupon/nhymxu-at-coupon.php' ) ) {
+			deactivate_plugins( plugin_basename( __DIR__ . '/nhymxu-at-coupon-pro.php' ) );
+			wp_die( 'Plugin này yêu cầu plugin AccessTrade Coupon phải được kích hoạt trước. Xin lỗi vì điều này.' );
+			return false;
+		}
+	
 		static::active_track();
 
 		if (! wp_next_scheduled ( 'nhymxu_at_coupon_sync_merchant_event' )) {
