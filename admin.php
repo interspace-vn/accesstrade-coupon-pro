@@ -29,7 +29,7 @@ class nhymxu_at_coupon_pro_admin {
 			$result = $this->coupon_insert( $input );
 		}
 
-		echo ( $result === false ) ? 0 : 1;
+		echo ( $result !== false ) ? 1 : 0;
 
 		wp_die();
 	}
@@ -308,12 +308,11 @@ class nhymxu_at_coupon_pro_admin {
 				- <button id="nhymxu_force_update" data-run="0" onclick="nhymxu_force_update_coupons();">Cập nhật ngay</button>
 				<?php endif; ?>
 			</p>
-			<?php $active_merchants = get_option('nhymxu_at_coupon_merchants', false); ?>
-			<?php if( $active_merchants ): ?>
+			<?php $active_merchants = get_option('nhymxu_at_coupon_merchants', []); ?>
 			<p>
-				Bạn có <?=count($active_merchants);?> campain đang hoạt động. <button id="nhymxu_force_update_merchants" data-run="0" onclick="nhymxu_force_update_merchants();">Cập nhật campain ngay</button>
+				Bạn có <?=count($active_merchants);?> campain đang hoạt động.&nbsp;
+				<button id="nhymxu_force_update_merchants" data-run="0" onclick="nhymxu_force_update_merchants();">Cập nhật campain ngay</button>
 			</p>
-			<?php endif;?>
 		</div>
 		<?php
 	}
@@ -390,7 +389,13 @@ class nhymxu_at_coupon_pro_admin {
 			var today_full = new Date();
 			var today = new Date( today_full.getFullYear() + '-' + (today_full.getMonth()+1) + '-' + today_full.getDate() );
 			var expired = new Date( input['exp'] );
-			if( +expired <= +today ) {
+			/*
+			console.log('Today: ' + today);
+			console.log(+today);
+			console.log('Expired: ' + expired);
+			console.log(+expired);
+			*/
+			if( +expired < +today ) {
 				nhymxu_insert_log('Chọn ngày hết hạn phải từ hôm nay.');
 				return false;
 			}
@@ -414,7 +419,7 @@ class nhymxu_at_coupon_pro_admin {
 					url: ajaxurl,
 					data: { action: 'nhymxu_coupons_ajax_insertupdate', coupon_data: input },
 					success: function(response) {
-						if( response == 'found' ) {
+						if( response == 0 ) {
 							alert('Xử lý thất bại. Vui lòng thử lại.');
 						} else {
 							alert('Thành công');
@@ -435,7 +440,7 @@ class nhymxu_at_coupon_pro_admin {
 					if( response == 'found' ) {
 						alert('Đã tồn tại coupon.');
 					} else if( response == 0 ) {
-						alert('Xử lý thất bại. Vui lòng thử lại.');
+						alert('Kiểm tra thất bại. Vui lòng thử lại.');
 					} else {
 						alert('Thành công');
 						exec_after_success();
