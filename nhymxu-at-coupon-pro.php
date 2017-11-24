@@ -13,6 +13,11 @@ define('NHYMXU_AT_COUPON_PRO_VER', '0.2.0');
 
 date_default_timezone_set('Asia/Ho_Chi_Minh');
 
+include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+if( !is_plugin_active( 'nhymxu-at-coupon/nhymxu-at-coupon.php' ) ) {
+	deactivate_plugins( plugin_basename( __FILE__ ) );
+}
+
 class nhymxu_at_coupon_pro {
 
 	private $ignore_campains = [
@@ -87,7 +92,7 @@ class nhymxu_at_coupon_pro {
 			$plugin_slug = plugin_basename( __FILE__ );
 			$license_user = 'nhymxu';
 			$license_key = 'AccessTrade';
-			new nhymxu_AT_AutoUpdate( NHYMXU_AT_COUPON_VER, $plugin_remote_path, $plugin_slug, $license_user, $license_key );
+			new nhymxu_AT_AutoUpdate( NHYMXU_AT_COUPON_PRO_VER, $plugin_remote_path, $plugin_slug, $license_user, $license_key );
 		}
 	}
 
