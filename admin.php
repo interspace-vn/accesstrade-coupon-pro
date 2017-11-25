@@ -406,7 +406,17 @@ class nhymxu_at_coupon_pro_admin {
 			if( input['save'].length > 5 ) {
 				nhymxu_insert_log('Mức giảm giá phải dưới 6 kí tự.');
 				return false;
-			} 
+			}
+
+			if( input['title'].length > 100 ) {
+				nhymxu_insert_log('Tiêu đề phải dưới 100 kí tự.');
+				return false;
+			}
+
+			if( input['note'].length > 100 ) {
+				nhymxu_insert_log('Ghi chú phải dưới 100 kí tự.');
+				return false;
+			}
 
 			function exec_after_success() {
 				if( action_type === 0 ) {
