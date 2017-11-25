@@ -9,7 +9,7 @@ Author URI: http://dungnt.net
 */
 
 defined( 'ABSPATH' ) || die;
-define('NHYMXU_AT_COUPON_PRO_VER', '0.1.0');
+define('NHYMXU_AT_COUPON_PRO_VER', "0.1.0");
 
 date_default_timezone_set('Asia/Ho_Chi_Minh');
 
