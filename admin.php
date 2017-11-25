@@ -359,6 +359,10 @@ class nhymxu_at_coupon_pro_admin {
 			display: inline-block;
 			min-width: 250px;
 		}
+		#nhymxu_coupon_notice {
+			margin-top: 20px;
+			margin-bottom: 20px;
+		}
 		</style>
 		<script type="text/javascript">
 		/*
@@ -415,6 +419,16 @@ class nhymxu_at_coupon_pro_admin {
 
 			if( input['note'].length > 100 ) {
 				nhymxu_insert_log('Ghi chú phải dưới 100 kí tự.');
+				return false;
+			}
+
+			if( input['url'].indexOf('http://') < 0 && input['url'].indexOf('https://') < 0 ) {
+				nhymxu_insert_log('Link phải bắt đầu bằng http:// hoặc https://');
+				return false;
+			}
+
+			if( input['url'].indexOf('pub.accesstrade.vn') > 0 || input['url'].indexOf('fast.accesstrade.com.vn') > 0 ) {
+				nhymxu_insert_log('Không được điền deeplink AccessTrade ở đây.');
 				return false;
 			}
 
