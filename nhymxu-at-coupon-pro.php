@@ -1,15 +1,15 @@
 <?php
 /*
-Plugin Name: AccessTrade Coupon Pro
+Plugin Name: ACCESSTRADE Coupon Pro
 Plugin URI: http://github.com/nhymxu/accesstrade-coupon-pro
-Description: Pro version for AccessTrade coupon
+Description: Pro version for ACCESSTRADE coupon
 Author: Dũng Nguyễn (nhymxu)
-Version: 0.2.0
+Version: 0.1.0
 Author URI: http://dungnt.net
 */
 
 defined( 'ABSPATH' ) || die;
-define('NHYMXU_AT_COUPON_PRO_VER', '0.2.0');
+define('NHYMXU_AT_COUPON_PRO_VER', '0.1.0');
 
 date_default_timezone_set('Asia/Ho_Chi_Minh');
 

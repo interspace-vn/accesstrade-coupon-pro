@@ -233,17 +233,17 @@ class nhymxu_at_coupon_pro_admin {
 		}
 		</script>
 		<div>
-			<h2>Cài đặt AccessTrade Coupon</h2>
+			<h2>Cài đặt ACCESSTRADE Coupon</h2>
 			<br>
 			<?php if( !isset($option['uid'], $option['accesskey']) ): ?>
-			<h3>Bạn cần nhập AccessTrade ID và Access Key để plugin hoạt động tốt.</h3>
+			<h3>Bạn cần nhập ACCESSTRADE ID và Access Key để plugin hoạt động tốt.</h3>
 			<br>
 			<?php endif; ?>
 			<form action="<?=admin_url( 'admin.php?page=accesstrade_coupon_settings' );?>" method="post">
 				<input type="hidden" name="nhymxu_hidden" value="coupon">
 				<table>
 					<tr>
-						<td>AccessTrade ID*:</td>
+						<td>ACCESSTRADE ID*:</td>
 						<td><input type="text" name="nhymxu_at_coupon_uid" value="<?=(isset($option['uid'])) ? $option['uid'] : '';?>"></td>
 					</tr>
 					<tr>
