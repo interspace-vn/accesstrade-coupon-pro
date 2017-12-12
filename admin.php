@@ -195,7 +195,13 @@ class nhymxu_at_coupon_pro_admin {
 
 			echo '<h1>Cập nhật thành công</h1><br>';
 		}
-		$option = get_option('nhymxu_at_coupon', ['uid' => '', 'utmsource' => '']);
+		$option = get_option('nhymxu_at_coupon', ['uid' => '', 'accesskey' => '', 'utmsource' => '']);
+		$uid = (isset($option['uid'])) ? $option['uid'] : '';
+		if( defined('NHYMXU_MARS_VERSION') && $uid == '' ) {
+			$uid = get_option('accesstrade_userid');
+			$option['uid'] = $uid;
+			update_option('nhymxu_at_coupon', $option);
+		}
 		?>
 		<script type="text/javascript">
 		function nhymxu_force_update_coupons() {
@@ -235,7 +241,7 @@ class nhymxu_at_coupon_pro_admin {
 		<div>
 			<h2>Cài đặt ACCESSTRADE Coupon</h2>
 			<br>
-			<?php if( !isset($option['uid'], $option['accesskey']) ): ?>
+			<?php if( !isset($option['uid'], $option['accesskey']) || $option['uid'] == '' || $option['accesskey'] == '' ): ?>
 			<h3>Bạn cần nhập ACCESSTRADE ID và Access Key để plugin hoạt động tốt.</h3>
 			<br>
 			<?php endif; ?>
@@ -244,7 +250,7 @@ class nhymxu_at_coupon_pro_admin {
 				<table>
 					<tr>
 						<td>ACCESSTRADE ID*:</td>
-						<td><input type="text" name="nhymxu_at_coupon_uid" value="<?=(isset($option['uid'])) ? $option['uid'] : '';?>"></td>
+						<td><input type="text" name="nhymxu_at_coupon_uid" value="<?=$uid;?>" <?=( defined('NHYMXU_MARS_VERSION') ) ? 'disabled' : '';?>></td>
 					</tr>
 					<tr>
 						<td></td>
@@ -359,6 +365,10 @@ class nhymxu_at_coupon_pro_admin {
 			display: inline-block;
 			min-width: 250px;
 		}
+		#nhymxu_coupon_notice {
+			margin-top: 20px;
+			margin-bottom: 20px;
+		}
 		</style>
 		<script type="text/javascript">
 		/*
@@ -406,7 +416,27 @@ class nhymxu_at_coupon_pro_admin {
 			if( input['save'].length > 5 ) {
 				nhymxu_insert_log('Mức giảm giá phải dưới 6 kí tự.');
 				return false;
-			} 
+			}
+
+			if( input['title'].length > 100 ) {
+				nhymxu_insert_log('Tiêu đề phải dưới 100 kí tự.');
+				return false;
+			}
+
+			if( input['note'].length > 100 ) {
+				nhymxu_insert_log('Ghi chú phải dưới 100 kí tự.');
+				return false;
+			}
+
+			if( input['url'].indexOf('http://') < 0 && input['url'].indexOf('https://') < 0 ) {
+				nhymxu_insert_log('Link phải bắt đầu bằng http:// hoặc https://');
+				return false;
+			}
+
+			if( input['url'].indexOf('pub.accesstrade.vn') > 0 || input['url'].indexOf('fast.accesstrade.com.vn') > 0 ) {
+				nhymxu_insert_log('Không được điền deeplink AccessTrade ở đây.');
+				return false;
+			}
 
 			function exec_after_success() {
 				if( action_type === 0 ) {
