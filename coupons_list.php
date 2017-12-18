@@ -43,18 +43,18 @@ class Nhymxu_AT_Coupon_List extends WP_List_Table
         $currentPage = $this->get_pagenum();
 
         $data = $this->table_data( $perPage, $currentPage );
-		
+
 		$totalItems = $this->get_number_of_records();
-		
+
         $this->set_pagination_args( [
             'total_items' => $totalItems,
             'per_page'    => $perPage
 		] );
-		
+
 		$this->_column_headers = [$columns, $hidden, $sortable];
         $this->items = $data;
 	}
-	
+
 	private function get_number_of_records() {
 		global $wpdb;
 
@@ -126,7 +126,7 @@ class Nhymxu_AT_Coupon_List extends WP_List_Table
 		global $wpdb;
 
 		$sql = "SELECT id, title, type, code, exp, note, save FROM {$wpdb->prefix}coupons";
-        
+
         if( $this->active_filter != '' ) {
             $sql .= ' WHERE type = "'. $this->active_filter .'"';
         }
@@ -148,8 +148,8 @@ class Nhymxu_AT_Coupon_List extends WP_List_Table
 		$sql .= " LIMIT $per_page";
 		$sql .= ' OFFSET ' . ( $page_number - 1 ) * $per_page;
 
-		$results = $wpdb->get_results( $sql, ARRAY_A );	
-	
+		$results = $wpdb->get_results( $sql, ARRAY_A );
+
 		return $results;
     }
     /**
@@ -206,10 +206,14 @@ class Nhymxu_AT_Coupon_List extends WP_List_Table
 	 * Allow filter per merchant
 	 */
 	function extra_tablenav( $which ) {
-        ?><div class="alignleft actions"><?php
-        if ( 'top' == $which ) {
-            if ( ! empty( $this->filters ) ):
-            ?>
+        ?>
+        <?php if( 'bottom' == $which ): ?>
+        <div class="alignleft nhymxu-bulk_delete">
+            <button class="button" id="nhymxu-bulk_delete">Xóa nhiều</button>
+        </div>
+        <?php endif; ?>
+        <div class="alignleft actions">
+        <?php if ( 'top' == $which && !empty( $this->filters ) ): ?>
             <select id="filter_merchant" name="filter_merchant">
                 <option value="">Tất cả merchant</option>
                 <?php foreach ( $this->filters as $merchant ): ?>
@@ -217,9 +221,9 @@ class Nhymxu_AT_Coupon_List extends WP_List_Table
                 <?php endforeach; ?>
             </select>
             <input id="btn-filter" type="submit" class="button" value="Lọc">
-            <?php endif;
-        }
-        ?></div><?php
+        <?php endif; ?>
+        </div>
+        <?php
     }
 
     /**
@@ -240,8 +244,8 @@ class Nhymxu_AT_Coupon_List extends WP_List_Table
         /*
         * on hitting apply in bulk actions the url paramas are set as
         * ?action=bulk-delete&paged=1&action2=-1
-        * 
-        * action and action2 are set based on the triggers above and below the table		 		    
+        *
+        * action and action2 are set based on the triggers above and below the table
         */
         $actions = ['bulk-delete' => 'Xóa coupon'];
         return $actions;
@@ -252,19 +256,19 @@ class Nhymxu_AT_Coupon_List extends WP_List_Table
     * Adds row action links to the title column.
     * e.g. url/admin.php?page=accesstrade_coupon_addnew&coupon_id=1
     */
-    protected function column_title( $item ) {		
+    protected function column_title( $item ) {
         $admin_page_url =  admin_url('admin.php');
         // row action to view usermeta.
         $query_args_editcoupon = array(
             'page'		=>  wp_unslash( 'accesstrade_coupon_addnew' ),
             'coupon_id'	=> absint( $item['id']),
         );
-        $editcoupon_link = esc_url( add_query_arg( $query_args_editcoupon, $admin_page_url ) );		
-        $actions['edit_coupon'] = '<a href="' . $editcoupon_link . '">Sửa</a>';		
+        $editcoupon_link = esc_url( add_query_arg( $query_args_editcoupon, $admin_page_url ) );
+        $actions['edit_coupon'] = '<a href="' . $editcoupon_link . '">Sửa</a>';
         $actions['delete_coupon'] = '<a href="javascript:void(0);" onclick="nhymxu_delete_coupon(\''. $item['id'] .'\', \''. $item['code'] .'\');">Xóa</a>';
         // similarly add row actions for add usermeta.
         //$_GET$row_value = '<strong>' . $item['title'] . '</strong>';
-        $row_value = $item['title'];        
+        $row_value = $item['title'];
         return $row_value . $this->row_actions( $actions );
     }
 }

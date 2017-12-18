@@ -5,7 +5,8 @@ class nhymxu_at_coupon_pro_admin {
 		add_action( 'admin_menu', [$this,'admin_page'] );
 		add_action( 'wp_ajax_nhymxu_coupons_ajax_insertupdate', [$this, 'ajax_insert_update'] );
 		add_action( 'wp_ajax_nhymxu_coupons_ajax_checkcoupon', [$this, 'ajax_check_coupon'] );
-		add_action( 'wp_ajax_nhymxu_coupons_ajax_deletecoupon', [$this, 'ajax_delete_coupon'] );	
+		add_action( 'wp_ajax_nhymxu_coupons_ajax_deletecoupon', [$this, 'ajax_delete_coupon'] );
+		add_action( 'wp_ajax_nhymxu_coupons_ajax_bulkdeletecoupon', [$this, 'ajax_bulk_delete_coupon'] );
 		add_action( 'init', [$this, 'wp_strip_referer'] );
 	}
 
@@ -86,13 +87,37 @@ class nhymxu_at_coupon_pro_admin {
 		wp_die();
 	}
 
+	public function ajax_bulk_delete_coupon() {
+		global $wpdb;
+
+		$ids = ($_POST['ids']) ? $_POST['ids'] : '';
+
+		if( $ids == '' ) {
+			echo 'not_found';
+			wp_die();
+		}
+		$ids = trim($ids);
+
+		$wpdb->query("START TRANSACTION;");
+		try {
+			$wpdb->query("DELETE FROM {$wpdb->prefix}coupons WHERE id IN({$ids});");
+			$wpdb->query("DELETE FROM {$wpdb->prefix}coupon_category_rel WHERE coupon_id IN({$ids});");
+			$wpdb->query("COMMIT;");
+			echo 'ok';
+		} catch ( Exception $e ) {
+			$wpdb->query("ROLLBACK;");
+			echo 'fail';
+		}
+		wp_die();
+	}
+
 	/*
 	 * callback insert function for ajax action
 	 */
 	private function coupon_insert( $input ) {
 		global $wpdb;
 
-		$result = $wpdb->insert( 
+		$result = $wpdb->insert(
 			$wpdb->prefix . 'coupons',
 			[
 				'type'	=> $input['merchant'],
@@ -109,7 +134,7 @@ class nhymxu_at_coupon_pro_admin {
 		if( $result !== false ) {
 			$this->coupon_tracking( $input );
 		}
-		
+
 		return $result;
 	}
 
@@ -119,7 +144,7 @@ class nhymxu_at_coupon_pro_admin {
 	private function coupon_update( $input ) {
 		global $wpdb;
 
-		$result = $wpdb->update( 
+		$result = $wpdb->update(
 			$wpdb->prefix . 'coupons',
 			[
 				'type'	=> $input['merchant'],
@@ -131,7 +156,7 @@ class nhymxu_at_coupon_pro_admin {
 				'save'	=> ($input['save']) ? $input['save'] : ''
 			],
 			[ 'id'	=> $input['cid'] ],
-			['%s','%s','%s','%s','%s','%s','%s'], 
+			['%s','%s','%s','%s','%s','%s','%s'],
 			['%d']
 		);
 
@@ -154,7 +179,7 @@ class nhymxu_at_coupon_pro_admin {
 				'data'	=> json_encode( $input )
 			],
 			'cookies' => []
-		]);		
+		]);
 	}
 
 	private function get_coupon_detail( $coupon_id ) {
@@ -168,7 +193,7 @@ class nhymxu_at_coupon_pro_admin {
 		}
 
 		return false;
-	} 
+	}
 
 	public function admin_page() {
 		add_menu_page( 'Danh sách coupon', 'Smart Coupons', 'manage_options', 'accesstrade_coupon', [$this, 'admin_page_callback_list'], 'dashicons-tickets', 6 );
@@ -188,7 +213,7 @@ class nhymxu_at_coupon_pro_admin {
 				'accesskey'	=> sanitize_text_field($_REQUEST['nhymxu_at_coupon_accesskey']),
 				'utmsource'	=> sanitize_text_field($_REQUEST['nhymxu_at_coupon_utmsource'])
 			];
-	
+
 			update_option('nhymxu_at_coupon', $input);
 			update_option( 'nhymxu_at_coupon_merchants', [] );
 			$nhymxu_at_coupon_pro->do_this_daily();
@@ -209,7 +234,7 @@ class nhymxu_at_coupon_pro_admin {
 			if( is_run !== 0 ) {
 				console.log('Đã chạy rồi');
 				return false;
-			} 
+			}
 			jQuery('#nhymxu_force_update').attr('disabled', 'disabled');
 			jQuery.ajax({
 				type: "POST",
@@ -226,7 +251,7 @@ class nhymxu_at_coupon_pro_admin {
 			if( is_run !== 0 ) {
 				console.log('Đã chạy rồi');
 				return false;
-			} 
+			}
 			jQuery('#nhymxu_force_update_merchants').attr('disabled', 'disabled');
 			jQuery.ajax({
 				type: "POST",
@@ -295,7 +320,7 @@ class nhymxu_at_coupon_pro_admin {
 			</p>
 			<h4>Danh các merchant</h4>
 			<p>
-			<?php 
+			<?php
 			$coupon_type = $wpdb->get_results("SELECT type FROM {$wpdb->prefix}coupons GROUP BY type", ARRAY_A);
 			foreach( $coupon_type as $row ) {
 				echo $row['type'], ', ';
@@ -305,8 +330,8 @@ class nhymxu_at_coupon_pro_admin {
 			<hr>
 			<?php
 			$total_coupon = $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}coupons" );
-			$today = date('Y-m-d');	
-			$total_expired_coupon = $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}coupons WHERE exp < '{$today}'" );		
+			$today = date('Y-m-d');
+			$total_expired_coupon = $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}coupons WHERE exp < '{$today}'" );
 			?>
 			<p>Tổng số coupon trong hệ thống: <strong><?=$total_coupon;?></strong></p>
 			<p>Tổng số coupon hết hạn: <strong><?=$total_expired_coupon;?></strong></p>
@@ -336,7 +361,7 @@ class nhymxu_at_coupon_pro_admin {
 		if( !$active_merchants ) {
 			echo 'Chưa có campain nào được duyệt ( hoặc chưa đồng bộ ). vui lòng đồng bộ campain lại ở <a href="'. admin_url('admin.php?page=accesstrade_coupon_settings') .'">đây</a>';
 			return false;
-		} 
+		}
 
 		$default_data = [
 			'id'	=> 0,
@@ -346,7 +371,7 @@ class nhymxu_at_coupon_pro_admin {
 			'exp'	=> '',
 			'note'	=> '',
 			'url'	=> '',
-			'save'	=> ''			
+			'save'	=> ''
 		];
 
 		if( isset($_GET['coupon_id']) && $_GET['coupon_id'] != '' ) {
@@ -478,7 +503,7 @@ class nhymxu_at_coupon_pro_admin {
 						alert('Thành công');
 						exec_after_success();
 					}
-				}			
+				}
 			});
 			}
 		}
@@ -599,16 +624,16 @@ class nhymxu_at_coupon_pro_admin {
 					}
 				});
 			}
-			
+
 			return false;
 		}
-		
+
 		jQuery(document).ready(function($) {
 			$('#btn-filter').click(function() {
 				var merchant = $('#filter_merchant').val();
 				if( merchant !== '' ) {
 					window.location.href = window.location.href + '&filter_merchant=' + merchant;
-				} 
+				}
 			});
 			$('#doaction').click(function() {
 				var action = $('#bulk-action-selector-top').val();
@@ -618,10 +643,48 @@ class nhymxu_at_coupon_pro_admin {
 						if( $(this).is(':checked') ) {
 							//console.log( $(this).val() );
 							bulk_id.push( $(this).val() );
-						} 
+						}
 						console.log(bulk_id);
 					});
-				} 
+				}
+			});
+			$('#nhymxu-bulk_delete').click(function(e) {
+				e.preventDefault();
+
+				var $coupon_checked = $('.input_coupon_bulk_action:checked');
+				if( $coupon_checked.length < 1 ) {
+					alert('Hãy chọn các coupon muốn xóa');
+					return false;
+				}
+
+				var coupon_ids = [];
+				$coupon_checked.each(function() {
+					coupon_ids.push( $(this).val() );
+				});
+				var ids = coupon_ids.toString();
+
+				var answer = confirm('Bạn muốn xóa hàng loạt coupon?');
+				if (answer == true) {
+					jQuery.ajax({
+						type: "POST",
+						url: ajaxurl,
+						data: { action: 'nhymxu_coupons_ajax_bulkdeletecoupon', ids:ids },
+						success: function( resp ) {
+							resp = jQuery.trim(resp);
+							if( resp == 'not_found' ) {
+								alert('Không có coupon ID');
+							} else if( resp == 'fail' ) {
+								alert( 'Xóa thất bại. vui lòng F5 và thử lại.' );
+							} else {
+								alert( 'Xóa thành công!' );
+								window.location.reload();
+							}
+							return true;
+						}
+					});
+				}
+
+				return false;
 			});
 		});
 		</script>
