@@ -30,8 +30,10 @@ class nhymxu_at_coupon_pro {
 
 	public function __construct() {
 		add_action( 'nhymxu_at_coupon_sync_merchant_event', [$this,'do_this_daily'] );
+		add_action( 'nhymxu_at_coupon_sync_category_event', [$this, 'do_this_weekly'] );
 		add_action( 'init', [$this, 'init_updater'] );
 		add_action( 'wp_ajax_nhymxu_coupons_ajax_forceupdate_merchants', [$this, 'ajax_force_update_merchants'] );
+		add_action( 'wp_ajax_nhymxu_coupons_ajax_forceupdate_categories', [$this, 'ajax_force_update_categories'] );
 	}
 
 	public function do_this_daily() {
@@ -42,7 +44,7 @@ class nhymxu_at_coupon_pro {
 
 		if( $options['accesskey'] == '' ) {
 			return false;
-		} 
+		}
 
 		$url = 'https://api.accesstrade.vn/v1/campaigns';
 
@@ -51,7 +53,7 @@ class nhymxu_at_coupon_pro {
 			'headers' => ['Authorization' => 'Token '. $options['accesskey'] ],
 		];
 
-		$result = wp_remote_get( $url, $args );		
+		$result = wp_remote_get( $url, $args );
 		if ( is_wp_error( $result ) ) {
 			$msg = [];
 			$msg['previous_time'] = '';
@@ -74,13 +76,26 @@ class nhymxu_at_coupon_pro {
 		}
 	}
 
+	public function do_this_weekly() {
+
+	}
+
 	/*
 	 * Force update merchant list from server
 	 */
 	public function ajax_force_update_merchants() {
 		$this->do_this_daily();
 		echo 'running';
-		wp_die();		
+		wp_die();
+	}
+
+	/*
+	 * Force update category list from server
+	 */
+	public function ajax_force_update_categories() {
+		$this->do_this_weekly();
+		echo 'running';
+		wp_die();
 	}
 
 	public function init_updater() {
@@ -98,8 +113,8 @@ class nhymxu_at_coupon_pro {
 
 	private function insert_coupon( $data ) {
 		global $wpdb;
-		
-		$result = $wpdb->insert( 
+
+		$result = $wpdb->insert(
 			$wpdb->prefix . 'coupons',
 			[
 				'type'	=> $data['merchant'],
@@ -112,7 +127,7 @@ class nhymxu_at_coupon_pro {
 			],
 			['%s','%s','%s','%s','%s','%s','%s']
 		);
-		
+
 		if ( $result ) {
 			$coupon_id = $wpdb->insert_id;
 			if( isset( $data['categories'] ) && !empty( $data['categories'] ) ) {
@@ -128,7 +143,7 @@ class nhymxu_at_coupon_pro {
 					);
 				}
 			}
-	
+
 			return 1;
 		}
 
@@ -137,21 +152,21 @@ class nhymxu_at_coupon_pro {
 		$msg['current_time'] = '';
 		$msg['error_msg'] = json_encode( $data );
 		$msg['action'] = 'insert_coupon';
-			
-		$nhymxu_at_coupon->insert_log( $msg );		
+
+		$nhymxu_at_coupon->insert_log( $msg );
 
 		return 0;
 	}
 
 	private function get_coupon_category_id( $input ) {
 		global $wpdb;
-	
+
 		$cat_id = [];
-	
+
 		foreach( $input as $row ) {
 			$slug = trim($row['slug']);
 			$result = $wpdb->get_row("SELECT * FROM {$wpdb->prefix}coupon_categories WHERE slug = '{$slug}'");
-			
+
 			if( $result ) {
 				$cat_id[] = (int) $result->id;
 			} else {
@@ -163,10 +178,10 @@ class nhymxu_at_coupon_pro {
 					],
 					['%s', '%s']
 				);
-				$cat_id[] = (int) $wpdb->insert_id;				
+				$cat_id[] = (int) $wpdb->insert_id;
 			}
 		}
-	
+
 		return $cat_id;
 	}
 }
