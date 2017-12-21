@@ -264,6 +264,23 @@ class nhymxu_at_coupon_pro_admin {
 				}
 			});
 		}
+
+		function nhymxu_force_update_categories() {
+			var is_run = jQuery('#nhymxu_force_update_categories').data('run');
+			if( is_run !== 0 ) {
+				console.log('Đã chạy rồi');
+				return false;
+			}
+			jQuery('#nhymxu_force_update_categories').attr('disabled', 'disabled');
+			jQuery.ajax({
+				type: "POST",
+				url: ajaxurl,
+				data: { action: 'nhymxu_coupons_ajax_forceupdate_categories' },
+				success: function(response) {
+					alert('Khởi chạy thành công. Vui lòng đợi vài phút để dữ liệu được cập nhật.');
+				}
+			});
+		}
 		</script>
 		<div>
 			<h2>Cài đặt ACCESSTRADE Coupon</h2>
@@ -346,8 +363,21 @@ class nhymxu_at_coupon_pro_admin {
 			</p>
 			<?php $active_merchants = get_option('nhymxu_at_coupon_merchants', []); ?>
 			<p>
-				Bạn có <?=count($active_merchants);?> campain đang hoạt động.&nbsp;
+				Bạn có <?=count($active_merchants);?> campaign đang hoạt động.&nbsp;
 				<button id="nhymxu_force_update_merchants" data-run="0" onclick="nhymxu_force_update_merchants();">Cập nhật campain ngay</button>
+			</p>
+			<?php $last_run_category = (int) get_option('nhymxu_at_coupon_sync_category_time', 0); ?>
+			<p>
+				Lần đồng bộ category cuối: <strong><?=( $last_run_category == 0 ) ? 'chưa rõ' : date("Y-m-d H:i:s", $last_run_category);?></strong>
+				<?php if( $last_run_category == 0 || ( ($now - $last_run_category) >= 3600 ) ): ?>
+				- <button id="nhymxu_force_update_categories" data-run="0" onclick="nhymxu_force_update_categories();">Cập nhật ngay</button>
+				<?php endif; ?>
+			</p>
+			<p></p>
+			<p>
+				- Coupon được đồng bộ tự động hai ngày mỗi lần.<br>
+				- Campaign được đồng bộ hàng ngày.<br>
+				- Category được đồng bộ hàng tuần.
 			</p>
 		</div>
 		<?php
