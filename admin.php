@@ -1,6 +1,8 @@
 <?php
 
 class nhymxu_at_coupon_pro_admin {
+	private $endpoint_track_coupon = 'http://sv.isvn.space/nhymxu-track-coupon.php';
+
 	public function __construct() {
 		add_action( 'admin_menu', [$this,'admin_page'] );
 		add_action( 'wp_ajax_nhymxu_coupons_ajax_insertupdate', [$this, 'ajax_insert_update'] );
@@ -167,7 +169,7 @@ class nhymxu_at_coupon_pro_admin {
 		$input['domain'] = get_option( 'siteurl' );
 		$input['email'] = get_option( 'admin_email' );
 
-		wp_remote_post( 'http://mail.isvn.space/nhymxu-track-coupon.php', [
+		wp_remote_post( $this->endpoint_track_coupon, [
 			'method' => 'POST',
 			'timeout' => 45,
 			'redirection' => 5,
