@@ -18,6 +18,14 @@ if( !is_plugin_active( 'nhymxu-at-coupon/nhymxu-at-coupon.php' ) ) {
 	deactivate_plugins( plugin_basename( __FILE__ ) );
 }
 
+function nhymxu_at_coupon_pro_weekly_cron_schedule( $schedules ) {
+	$schedules[ 'weekly' ] = array(
+		'interval' => 60 * 60 * 24 * 7, # 604,800, seconds in a week
+		'display' => __( 'Weekly' ) );
+	return $schedules;
+}
+add_filter( 'cron_schedules', 'nhymxu_at_coupon_pro_weekly_cron_schedule' );
+
 class nhymxu_at_coupon_pro {
 
 	private $ignore_campains = [
@@ -85,7 +93,7 @@ class nhymxu_at_coupon_pro {
 		$current_time = time();
 
 		$args = [ 'timeout'=>'120' ];
-		$result = wp_remote_get( $this->endpoint_at_category, $args );
+		$result = wp_remote_get( $this->endpoint_sv_category, $args );
 
 		if ( is_wp_error( $result ) ) {
 			$msg = [];
@@ -96,29 +104,31 @@ class nhymxu_at_coupon_pro {
 
 			$nhymxu_at_coupon->insert_log( $msg );
 
-			return false;
+			return $result->get_error_message();
 		}
 
 		$input = json_decode( $result['body'], true );
 
 		if( empty($input) ) {
-			return false;
+			return 'empty_input';
 		}
 
 		$input_compare = array_map(function($elem){ return $elem['slug']; }, $input);
 		$local = $wpdb->get_col("SELECT slug FROM {$wpdb->prefix}coupon_categories");
 		$diff = array_diff($input_compare, $local);
 
-		if( !empty($diff) ) {
-			return false;
+		if( empty($diff) ) {
+			update_option( 'nhymxu_at_coupon_sync_category_time', $current_time);
+			return 'empty_diff';
 		}
 
 		$wpdb->query("START TRANSACTION;");
 		try {
 			foreach( $input as $remote_cat ) {
-				if( in_array( $remote_cat['slug'], $diff ) ) {
+				if( !in_array( $remote_cat['slug'], $diff ) ) {
 					continue;
 				}
+
 				$wpdb->insert(
 					$wpdb->prefix . 'coupon_categories',
 					[
@@ -141,6 +151,8 @@ class nhymxu_at_coupon_pro {
 
 			$wpdb->query("ROLLBACK;");
 		}
+
+		return 'running';
 	}
 
 	/*
@@ -156,8 +168,8 @@ class nhymxu_at_coupon_pro {
 	 * Force update category list from server
 	 */
 	public function ajax_force_update_categories() {
-		$this->do_this_weekly();
-		echo 'running';
+		$result = $this->do_this_weekly();
+		echo $result;
 		wp_die();
 	}
 
