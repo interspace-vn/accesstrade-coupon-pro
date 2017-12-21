@@ -30,6 +30,7 @@ class nhymxu_at_coupon_pro {
 
 	private $endpoint_at_campaign = 'https://api.accesstrade.vn/v1/campaigns';
 	private $endpoint_plugin_update = 'http://sv.isvn.space/wp-update/plugin-accesstrade-coupon-pro.json';
+	private $endpoint_sv_category = 'http://sv.isvn.space/api/v1/mars/category';
 
 	public function __construct() {
 		add_action( 'nhymxu_at_coupon_sync_merchant_event', [$this,'do_this_daily'] );
@@ -40,7 +41,7 @@ class nhymxu_at_coupon_pro {
 	}
 
 	public function do_this_daily() {
-		global $wpdb;
+		global $wpdb, $nhymxu_at_coupon;
 		$current_time = time();
 
 		$options = get_option('nhymxu_at_coupon', ['uid' => '', 'accesskey' => '','utmsource' => '']);
@@ -63,22 +64,83 @@ class nhymxu_at_coupon_pro {
 			$msg['action'] = 'get_merchant';
 
 			$nhymxu_at_coupon->insert_log( $msg );
-		} else {
-			$input = json_decode( $result['body'], true );
-			if( !empty($input) && isset( $input['data'] ) && is_array( $input['data'] ) ) {
-				$prepare_data = [];
-				foreach( $input['data'] as $campain ) {
-					if( $campain['approval'] == 'successful' && $campain['scope'] == 'public' && !in_array( $campain['merchant'], $this->ignore_campains ) ) {
-						$prepare_data[$campain['merchant']] = $campain['name'];
-					}
+
+			return false;
+		}
+
+		$input = json_decode( $result['body'], true );
+		if( !empty($input) && isset( $input['data'] ) && is_array( $input['data'] ) ) {
+			$prepare_data = [];
+			foreach( $input['data'] as $campain ) {
+				if( $campain['approval'] == 'successful' && $campain['scope'] == 'public' && !in_array( $campain['merchant'], $this->ignore_campains ) ) {
+					$prepare_data[$campain['merchant']] = $campain['name'];
 				}
-				update_option( 'nhymxu_at_coupon_merchants', $prepare_data );
 			}
+			update_option( 'nhymxu_at_coupon_merchants', $prepare_data );
 		}
 	}
 
 	public function do_this_weekly() {
+		global $wpdb, $nhymxu_at_coupon;
+		$current_time = time();
 
+		$args = [ 'timeout'=>'120' ];
+		$result = wp_remote_get( $this->endpoint_at_category, $args );
+
+		if ( is_wp_error( $result ) ) {
+			$msg = [];
+			$msg['previous_time'] = '';
+			$msg['current_time'] = $current_time;
+			$msg['error_msg'] = $result->get_error_message();
+			$msg['action'] = 'get_category';
+
+			$nhymxu_at_coupon->insert_log( $msg );
+
+			return false;
+		}
+
+		$input = json_decode( $result['body'], true );
+
+		if( empty($input) ) {
+			return false;
+		}
+
+		$input_compare = array_map(function($elem){ return $elem['slug']; }, $input);
+		$local = $wpdb->get_col("SELECT slug FROM {$wpdb->prefix}coupon_categories");
+		$diff = array_diff($input_compare, $local);
+
+		if( !empty($diff) ) {
+			return false;
+		}
+
+		$wpdb->query("START TRANSACTION;");
+		try {
+			foreach( $input as $remote_cat ) {
+				if( in_array( $remote_cat['slug'], $diff ) ) {
+					continue;
+				}
+				$wpdb->insert(
+					$wpdb->prefix . 'coupon_categories',
+					[
+						'name'	=> trim($remote_cat['title']),
+						'slug'	=> trim($remote_cat['slug'])
+					],
+					['%s', '%s']
+				);
+			}
+			update_option( 'nhymxu_at_coupon_sync_category_time', $current_time);
+			$wpdb->query("COMMIT;");
+		} catch ( Exception $e ) {
+			$msg = [];
+			$msg['previous_time'] = $previous_time;
+			$msg['current_time'] = $current_time;
+			$msg['error_msg'] = $e->getMessage();
+			$msg['action'] = 'insert_category';
+
+			$nhymxu_at_coupon->insert_log( $msg );
+
+			$wpdb->query("ROLLBACK;");
+		}
 	}
 
 	/*
