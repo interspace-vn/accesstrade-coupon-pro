@@ -28,6 +28,9 @@ class nhymxu_at_coupon_pro {
 		'lazadaapp',
 	];
 
+	private $endpoint_at_campaign = 'https://api.accesstrade.vn/v1/campaigns';
+	private $endpoint_plugin_update = 'http://sv.isvn.space/wp-update/plugin-accesstrade-coupon-pro.json';
+
 	public function __construct() {
 		add_action( 'nhymxu_at_coupon_sync_merchant_event', [$this,'do_this_daily'] );
 		add_action( 'nhymxu_at_coupon_sync_category_event', [$this, 'do_this_weekly'] );
@@ -46,14 +49,12 @@ class nhymxu_at_coupon_pro {
 			return false;
 		}
 
-		$url = 'https://api.accesstrade.vn/v1/campaigns';
-
 		$args = [
 			'timeout'=>'60',
 			'headers' => ['Authorization' => 'Token '. $options['accesskey'] ],
 		];
 
-		$result = wp_remote_get( $url, $args );
+		$result = wp_remote_get( $this->endpoint_at_campaign, $args );
 		if ( is_wp_error( $result ) ) {
 			$msg = [];
 			$msg['previous_time'] = '';
@@ -103,7 +104,7 @@ class nhymxu_at_coupon_pro {
 			if( !class_exists('nhymxu_AT_AutoUpdate') ) {
 				require_once('nhymxu-updater.php');
 			}
-			$plugin_remote_path = 'http://sv.isvn.space/wp-update/plugin-accesstrade-coupon-pro.json';
+			$plugin_remote_path = $this->endpoint_plugin_update;
 			$plugin_slug = plugin_basename( __FILE__ );
 			$license_user = 'nhymxu';
 			$license_key = 'AccessTrade';
