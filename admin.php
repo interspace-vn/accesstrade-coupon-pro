@@ -134,6 +134,17 @@ class nhymxu_at_coupon_pro_admin {
 		);
 
 		if( $result !== false ) {
+			if( isset($input['category']) && $input['category']['id'] > 0 ) {
+				$coupon_id = $wpdb->insert_id;
+				$wpdb->insert(
+					$wpdb->prefix . 'coupon_category_rel',
+					[
+						'coupon_id' => $coupon_id,
+						'category_id'	=> $input['category']['id']
+					],
+					['%d', '%d']
+				);
+			}
 			$this->coupon_tracking( $input );
 		}
 
@@ -160,6 +171,16 @@ class nhymxu_at_coupon_pro_admin {
 			[ 'id'	=> $input['cid'] ],
 			['%s','%s','%s','%s','%s','%s','%s'],
 			['%d']
+		);
+
+		$wpdb->delete( $wpdb->prefix . 'coupon_category_rel', ['coupon_id' => $input['cid']] );
+		$wpdb->insert(
+			$wpdb->prefix . 'coupon_category_rel',
+			[
+				'coupon_id' => $input['cid'],
+				'category_id'	=> $input['category']['id']
+			],
+			['%d', '%d']
 		);
 
 		return $result;
@@ -195,6 +216,19 @@ class nhymxu_at_coupon_pro_admin {
 		}
 
 		return false;
+	}
+
+	private function get_coupon_category( $coupon_id ) {
+		global $wpdb;
+
+		$coupon_id = (int) $coupon_id;
+		$result = $wpdb->get_row("SELECT * FROM {$wpdb->prefix}coupon_category_rel WHERE coupon_id = {$coupon_id}", ARRAY_A);
+
+		if( null !== $result ) {
+			return $result['category_id'];
+		}
+
+		return 0;
 	}
 
 	public function admin_page() {
@@ -387,6 +421,7 @@ class nhymxu_at_coupon_pro_admin {
 	 * Admin page add new
 	 */
 	public function admin_page_callback_addnew() {
+		global $wpdb;
 
 		$active_merchants = get_option('nhymxu_at_coupon_merchants', false);
 
@@ -403,15 +438,21 @@ class nhymxu_at_coupon_pro_admin {
 			'exp'	=> '',
 			'note'	=> '',
 			'url'	=> '',
-			'save'	=> ''
+			'save'	=> '',
+			'category_id' => 0
 		];
 
 		if( isset($_GET['coupon_id']) && $_GET['coupon_id'] != '' ) {
 			$tmp = $this->get_coupon_detail($_GET['coupon_id']);
 			if( $tmp ) {
 				$default_data = $tmp;
+				$tmp2 = $this->get_coupon_category($_GET['coupon_id']);
+				$default_data['category_id'] = $tmp2;
 			}
 		}
+
+		$categories = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}coupon_categories");
+
 		?>
 		<link rel="stylesheet" href="//unpkg.com/purecss@1.0.0/build/forms-min.css">
 		<link rel="stylesheet" href="//unpkg.com/purecss@1.0.0/build/buttons-min.css">
@@ -448,7 +489,8 @@ class nhymxu_at_coupon_pro_admin {
 				note: jq('#input_note').val(),
 				url: jq('#input_url').val(),
 				save: jq('#input_save').val(),
-				exp: jq('#input_exp').val()
+				exp: jq('#input_exp').val(),
+				category: {id:0,name:'',slug:''}
 			};
 
 			if( input['merchant'] === '' || input['title'] === '' || input['url'] === '' || input['exp'] === '' ) {
@@ -493,6 +535,13 @@ class nhymxu_at_coupon_pro_admin {
 			if( input['url'].indexOf('pub.accesstrade.vn') > 0 || input['url'].indexOf('fast.accesstrade.com.vn') > 0 ) {
 				nhymxu_insert_log('Không được điền deeplink AccessTrade ở đây.');
 				return false;
+			}
+
+			var cat = jQuery('#input_category option:selected');
+			if( cat.val() !== "" ) {
+				input['category']['id'] = cat.val();
+				input['category']['slug'] = cat.data('slug');
+				input['category']['name'] = cat.data('name');
 			}
 
 			function exec_after_success() {
@@ -597,6 +646,16 @@ class nhymxu_at_coupon_pro_admin {
 						<div class="pure-control-group">
 							<label for="input_exp">Ngày hết hạn*</label>
 							<input id="input_exp" type="date" placeholder="YYYY-MM-DD" required value="<?=$default_data['exp'];?>" autocomplete="off">
+						</div>
+
+						<div class="pure-control-group">
+							<label for="input_category">Category</label>
+							<select id="input_category">
+								<option value="">Chọn category</option>
+								<?php foreach( $categories as $cat ): ?>
+								<option value="<?=$cat->id;?>" data-slug="<?=$cat->slug;?>" data-name="<?=$cat->name;?>" <?=( $cat->id == $default_data['category_id'] ) ? ' selected' : ''; ?>><?=$cat->name;?></option>
+								<?php endforeach; ?>
+							</select>
 						</div>
 
 						<div class="pure-controls">
