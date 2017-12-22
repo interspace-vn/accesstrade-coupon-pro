@@ -59,7 +59,7 @@ class nhymxu_at_coupon_pro {
 		}
 
 		$args = [
-			'timeout'=>'60',
+			'timeout'=>'120',
 			'headers' => ['Authorization' => 'Token '. $options['accesskey'] ],
 		];
 
