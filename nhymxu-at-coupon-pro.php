@@ -4,7 +4,7 @@ Plugin Name: ACCESSTRADE Coupon Pro
 Plugin URI: http://github.com/nhymxu/accesstrade-coupon-pro
 Description: Pro version for ACCESSTRADE coupon
 Author: Dũng Nguyễn (nhymxu)
-Version: 0.2.0-dev
+Version: 0.2.0
 Author URI: http://dungnt.net
 */
 
