@@ -746,6 +746,28 @@ class nhymxu_at_coupon_pro_admin {
 			return false;
 		}
 
+		function nhymxu_clear_expired_coupon() {
+			var is_run = jQuery('#nhymxu_clear_expired').data('run');
+			if( is_run !== 0 ) {
+				console.log('Đã chạy rồi');
+				return false;
+			}
+			jQuery('#nhymxu_clear_expired').attr('disabled', 'disabled');
+			jQuery.ajax({
+				type: "POST",
+				url: ajaxurl,
+				data: { action: 'nhymxu_coupons_ajax_clearexpired' },
+				success: function(response) {
+					if( response === 'failed' ) {
+						alert('Dọn dẹp thất bại, vui lòng thử lại sau');
+						return false;
+					}
+					alert('Đã xoá ' + response + ' coupon hết hạn.');
+					return true;
+				}
+			});
+		}
+
 		jQuery(document).ready(function($) {
 			$('#btn-filter').click(function() {
 				var merchant = $('#filter_merchant').val();
@@ -808,7 +830,8 @@ class nhymxu_at_coupon_pro_admin {
 		</script>
 		<div class="wrap">
 			<h1 class="dashicons-before dashicons-tickets wp-heading-inline">Coupons</h1>
- 			<a href="<?=admin_url( 'admin.php?page=accesstrade_coupon_addnew' );?>" class="page-title-action">Thêm mới</a>
+			<a href="<?=admin_url( 'admin.php?page=accesstrade_coupon_addnew' );?>" class="page-title-action">Thêm mới</a>
+			<a href="javascript:void(0);" class="page-title-action" id="nhymxu_clear_expired" data-run="0" onclick="nhymxu_clear_expired_coupon();">Dọn dẹp coupon hết hạn</a>
 			<hr class="wp-header-end">
 			<form id="nhymxu-coupon-list-form" method="get">
 				<input type="hidden" name="page" value="<?php echo $_REQUEST['page'] ?>">
