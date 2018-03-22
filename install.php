@@ -25,6 +25,19 @@ class nhymxu_at_coupon_pro_install {
 			wp_die( 'Plugin này yêu cầu plugin AccessTrade Coupon phải được kích hoạt trước. Xin lỗi vì điều này.' );
 			return false;
 		}
+		
+		if (version_compare(PHP_VERSION, '5.5.20', '<')) {
+			wp_die(
+				sprintf(
+					'AccessTrade Coupon Pro plugin requires PHP 5.5.20 or higher.
+					Your WordPress site is using PHP %s. Please contact your hosting
+					provider and ask that they upgrade the version of PHP on which
+					your installation of WordPress is running. Click back in your
+					browser to your WordPress dashboard.',
+					PHP_VERSION
+				)
+			);
+    	}
 
 		static::active_track();
 
