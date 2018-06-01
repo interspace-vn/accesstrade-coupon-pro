@@ -4,12 +4,12 @@ Plugin Name: ACCESSTRADE Coupon Pro
 Plugin URI: http://github.com/nhymxu/accesstrade-coupon-pro
 Description: Pro version for ACCESSTRADE coupon
 Author: Dũng Nguyễn (nhymxu)
-Version: 0.3.0
-Author URI: http://dungnt.net
+Version: 0.3.1
+Author URI: https://dungnt.net
 */
 
 defined( 'ABSPATH' ) || die;
-define('NHYMXU_AT_COUPON_PRO_VER', "0.3.0");
+define('NHYMXU_AT_COUPON_PRO_VER', "0.3.1");
 
 date_default_timezone_set('Asia/Ho_Chi_Minh');
 
@@ -28,12 +28,11 @@ add_filter( 'cron_schedules', 'nhymxu_at_coupon_pro_weekly_cron_schedule' );
 
 class nhymxu_at_coupon_pro {
 
-	private $ignore_campains = [
+	private $ignore_campaigns = [
 		'lazadacashback',
 		'uber_rider',
 		'ubernew',
 		'agodamobile',
-		'lazadaapp',
 	];
 
 	private $endpoint_at_campaign = 'https://api.accesstrade.vn/v1/campaigns';
@@ -80,7 +79,7 @@ class nhymxu_at_coupon_pro {
 		if( !empty($input) && isset( $input['data'] ) && is_array( $input['data'] ) ) {
 			$prepare_data = [];
 			foreach( $input['data'] as $campain ) {
-				if( $campain['approval'] == 'successful' && $campain['scope'] == 'public' && !in_array( $campain['merchant'], $this->ignore_campains ) ) {
+				if( $campain['approval'] == 'successful' && $campain['scope'] == 'public' && !in_array( $campain['merchant'], $this->ignore_campaigns ) ) {
 					$prepare_data[$campain['merchant']] = $campain['name'];
 				}
 			}
