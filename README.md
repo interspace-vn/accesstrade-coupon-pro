@@ -1,5 +1,7 @@
-# accesstrade-coupon
+# accesstrade-coupon-pro
 Hệ thống đồng bộ coupon tự động
+
+Phiên bản pro sẽ ngừng phát triển tại repo này và được merge vào nhymxu/accesstrade-coupon để phát triển tiếp kể từ version 1.0
 
 # Cài đặt
 
