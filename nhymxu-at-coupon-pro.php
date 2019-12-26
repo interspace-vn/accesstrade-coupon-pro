@@ -85,7 +85,6 @@ class nhymxu_at_coupon_pro {
                         $prepare_data[$campain['merchant']] = $campain['name'];
                     }
                 }
-                update_option('nhymxu_at_coupon_merchants', $prepare_data);
                 $page +=1;
                 continue;
             }
@@ -96,9 +95,9 @@ class nhymxu_at_coupon_pro {
                     $prepare_data[$campain['merchant']] = $campain['name'];
                 }
             }
-            update_option('nhymxu_at_coupon_merchants', $prepare_data);
             $page +=1;
         }
+        update_option('nhymxu_at_coupon_merchants', $prepare_data);
 	}
 
 	public function do_this_weekly() {
